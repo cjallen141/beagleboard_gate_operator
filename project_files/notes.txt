@@ -1,0 +1,3 @@
+5/7/13 : switched to beaglebone because the board currently isn't configured to accept serial (i suspect the file system image is not there)
+       : python appears to already be installed on the beagle bone 
+
