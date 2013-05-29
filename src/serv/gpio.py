@@ -17,6 +17,7 @@ class GPIO:
 		#to do, create look up table for names.
 
 		#simple hack for the gpio i know i'm using now
+		self.state = False
 		if (pin_name == "gpmc_ad6"):
 				self.pin_number = 38
 		self.pin_name = pin_name
@@ -63,11 +64,16 @@ class GPIO:
 			print 'set direction'
 		GPIO.instances.append(self)
 	
-	def writeVal(value):
-		path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/direction"
+	def writeVal(self):
+		path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/value"
+		print path
 		f = file(path, 'w')
-		if(value==1 | value==0):
-				f.write(value)
+		if(self.state == True):
+			f.write("0")
+			self.state = False
+		else:
+			f.write("1")
+			self.state = True
 		f.close()
 		
 	##delete

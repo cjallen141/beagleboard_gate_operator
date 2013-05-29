@@ -3,9 +3,12 @@ import tornado.web
 import gpio
 
 
+pin38 = gpio.GPIO("gpmc_ad6",7,"out")
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Hello, world")
+        pin38.writeVal()
 
 		
 application = tornado.web.Application([
@@ -13,7 +16,5 @@ application = tornado.web.Application([
 ])
 
 if __name__ == "__main__":
-	pin38 = gpio.GPIO("gpmc_ad6",7,"out")
 	application.listen(8888)
 	tornado.ioloop.IOLoop.instance().start()
-	
