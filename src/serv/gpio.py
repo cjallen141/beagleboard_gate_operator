@@ -12,12 +12,14 @@ import sys
 
 class GPIO:
 	instances = []
+################init#################
 	def __init__(self, pin_name,mode,direction):
   		#pin_name = gpmc_ad6	mode = 7 direction = out
 		#to do, create look up table for names.
 
-		#simple hack for the gpio i know i'm using now
-		self.state = False
+		
+		self.state = False #state of the output
+		
 		if (pin_name == "gpmc_ad6"):
 				self.pin_number = 38
 		self.pin_name = pin_name
@@ -63,7 +65,27 @@ class GPIO:
 			f.close()
 			print 'set direction'
 		GPIO.instances.append(self)
-	
+		
+		self.value_path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/value"
+#########toggle()#################
+	#this will toggle the current state of the output pin
+	def toggle(self):
+		f = file(self.value_path, 'w')
+		try:
+			if(self.state == True):
+				f.write("0")
+				self.state = False
+			else:
+				f.write("1")
+				self.state = True
+		except IOError:
+			print "Error using toggle"
+			self.unexport() #cleanup pin
+			f.close()
+		else:
+			f.close()
+
+######writeVal##################	
 	def writeVal(self):
 		path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/value"
 		print path
@@ -75,8 +97,8 @@ class GPIO:
 			f.write("1")
 			self.state = True
 		f.close()
-		
-	##delete
+
+########delete################
 	def unexport(self):
 		#unexport the pin
 		try:
