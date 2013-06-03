@@ -16,5 +16,9 @@ application = tornado.web.Application([
 ])
 
 if __name__ == "__main__":
-	application.listen(8888)
-	tornado.ioloop.IOLoop.instance().start()
+    application.listen(8888)
+    try:
+        tornado.ioloop.IOLoop.instance().start()
+    except KeyboardInterrupt: #catch when stop the webserver
+        # I need to clean up all the gpio that are used
+        pin38.close()
