@@ -10,6 +10,7 @@
 #		declare something when crashes to unexport
 import sys
 
+
 class GPIO:
 	instances = []
 ################init#################
@@ -111,3 +112,10 @@ class GPIO:
 			f.close()
 			print "unexported"
 		GPIO.instances.remove(self)
+		
+
+# subclass for output:
+#	this class defines how to implement the super class methods
+class OutputGPIO(GPIO):
+    def __init__(self, pin_name):
+        GPIO.__init__(self, pin_name,7,"out")

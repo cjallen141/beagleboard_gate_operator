@@ -3,7 +3,7 @@ import tornado.web
 import gpio
 
 
-pin38 = gpio.GPIO("gpmc_ad6",7,"out")
+pin38 = gpio.OutputGPIO("gpmc_ad6")
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
