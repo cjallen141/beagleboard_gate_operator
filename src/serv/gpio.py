@@ -13,6 +13,15 @@ import sys
 
 class GPIO:
     instances = []
+    @staticmethod
+    # CloseAll
+    #   static method to close every instance of a GPIO object. 
+    #   should be used when closing program, to ensure no pins have be left
+    #   exported
+    def CloseAll():
+        for gpio in GPIO.instances:
+            gpio.close()
+        
 ################init#################
     def __init__(self, pin_name,mode,direction):
         #pin_name = gpmc_ad6	mode = 7 direction = out

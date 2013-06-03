@@ -21,4 +21,4 @@ if __name__ == "__main__":
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt: #catch when stop the webserver
         # I need to clean up all the gpio that are used
-        pin38.close()
+        gpio.GPIO.CloseAll()
