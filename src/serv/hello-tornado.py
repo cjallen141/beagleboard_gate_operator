@@ -7,20 +7,24 @@ import gpio
 pin38 = gpio.OutputGPIO("gpmc_ad6")
 
 class MainHandler(tornado.web.RequestHandler):
+    t = tornado.template.Loader("html")
     def get(self):
         #load the template file
-        t = tornado.template.Loader("html")
-        self.write( t.load("template.html").generate() )
+        
+        self.write( self.t.load("template.html").generate() )
         #self.write("Hello, world")
-        pin38.writeVal()
+        #pin38.writeVal()
 
+    def post(self):
+        pin38.writeVal()
+        self.write(self.t.load("template.html").generate())
 		
 application = tornado.web.Application([
 	(r"/", MainHandler),
 ])
 
 if __name__ == "__main__":
-    application.listen(8888)
+    application.listen(80)
     try:
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt: #catch when stop the webserver
