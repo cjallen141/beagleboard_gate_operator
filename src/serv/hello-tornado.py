@@ -8,7 +8,7 @@ pin38 = gpio.OutputGPIO("gpmc_ad6")
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Hello, world")
-        pin38.writeVal()
+        pin38.toggle()
 
 		
 application = tornado.web.Application([

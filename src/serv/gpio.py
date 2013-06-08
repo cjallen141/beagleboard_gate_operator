@@ -15,13 +15,16 @@ import sys
 
 
 class GPIO:
+    #class variable
     instances = []
+    #instance variables
+    pin_name =''
     # CloseAll
     #   static method to close every instance of a GPIO object. 
     #   should be used when closing program, to ensure no pins have be left
     #   exported
     @staticmethod
-    def close_All():
+    def close_all():
         for gpio in GPIO.instances:
             gpio.close()
     #   AddInstance
@@ -35,20 +38,33 @@ class GPIO:
 ################init#################
     def __init__(self, pin_name,mode,direction):
         #pin_name = gpmc_ad6	mode = 7 direction = out
-        #to do, create look up table for names.
-        self.state = False #state of the output
+        ##############to do, create look up table for names.
+        
 		
-        if (pin_name == "gpmc_ad6"):
-            self.pin_number = 38
         self.pin_name = pin_name
         self.mode = mode
         self.direction = direction
+
+        ###todo: double check if is or not..
+        self.is_exported = False #state of exported pin
+
+        self.state = False #state of the output (false = 0 , true =1 )
+
+        ##like above, set up lookup table
+        if(self.pin_name == "gpmc_ad6"):
+            self.pin_number = 38
+
+        self.mode_path = "/sys/kernel/debug/omap_mux/"+self.pin_name
+        self.export_path = "/sys/class/gpio/export"
+        self.pin_path = "/sys/class/gpio/gpio"+str(self.pin_number)
+        self.direction_path = self.pin_path+"/direction"
+        self.value_path = self.pin_path+"/value"
+
         ##set up pin mode
         try:
-            path = "/sys/kernel/debug/omap_mux/"+self.pin_name
-            print path
+            path = self.mode_path
             f = file(path, 'w')
-            f.write("%d" % (mode))
+            f.write("%d" % (self.mode)) #mode determines if input or output
         except IOError:
             print "Error : can\'t find file or read data"
         else:
@@ -59,21 +75,26 @@ class GPIO:
 		
 		##to do: check if already exported, because this looks like it could error
 		# - not error though
+
+        #   in from command line in ubuntu you can export the pin by doing
+        #               echo pin# > /sys/class/gpio/export  
+        #  to unexport:  echo pin# > /sys/class/gpio/unexport 
+        # note: if you get IOError: 16, Device or resource busy, it might be
+        #   because trying to export the pin if it is already exported
         try:
-            d = file("/sys/class/gpio/export", 'w')
-            d.write("%d" % (self.pin_number))
+            d = file(self.export_path, 'w')
+            d.write("%d" % (self.pin_number)) #i
         except IOError:
             print "Error: can\'t open export file"
             sys.exit()
         else:
-            print 'exported pin'
+            print 'exported pin' + str(self.pin_number)
+            self.is_exported = True
             d.close()
 
-            #set direction
-        print str(self.pin_number)
+        #set direction
         try:
-            path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/direction"
-            print path 
+            path = self.direction_path
             f = file(path,'w')
             f.write(self.direction)
         except IOError:
@@ -81,41 +102,9 @@ class GPIO:
             sys.exit()
         else:
             f.close()
-            print 'set direction'
+            print 'set direction: ' + self.direction
         GPIO.instances.append(self)
 		
-        self.value_path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/value"
-#########toggle()#################
-	#this will toggle the current state of the output pin
-    def toggle(self):
-        f = file(self.value_path, 'w')
-        try:
-            if(self.state == True):
-                f.write("0")
-                self.state = False
-            else:
-                f.write("1")
-                self.state = True
-        except IOError:
-            print "Error using toggle"
-            self.unexport() #cleanup pin
-            f.close()
-        else:
-            f.close()
-
-######writeVal##################	
-    def writeVal(self):
-        path = "/sys/class/gpio/gpio"+str(self.pin_number)+"/value"
-        print path
-        f = file(path, 'w')
-        if(self.state == True):
-            f.write("0")
-            self.state = False
-        else:
-            f.write("1")
-            self.state = True
-        f.close()
-
 ########close################
     def close(self):
         #unexport the pin
@@ -128,6 +117,7 @@ class GPIO:
         else:
             f.close()    
             print "\n unexported pin: "+ str(self.pin_number)
+            self.is_exported = False
         GPIO.instances.remove(self)
     
 
@@ -136,6 +126,40 @@ class GPIO:
 class OutputGPIO(GPIO):
     def __init__(self, pin_name):
         GPIO.__init__(self, pin_name,7,"out")
+
+#########toggle()#################
+    #this will toggle the current state of the output pin
+    def toggle(self):
+        f = file(self.value_path, 'w')
+        try:
+            if(self.state == True):
+                f.write("0")
+                self.state = False
+            else:
+                f.write("1")
+                self.state = True
+        except IOError:
+            print "Error using toggle"
+            f.close()
+        else:
+            f.close()
+
+######writeVal##################    
+    def writeVal(self,val):
+        #sanitize input
+        if(val!="1" | val!="0"):
+            print "why are you doing this to me? \n"
+            print "default: val = '0' "
+            val = "0"
+
+        path = self.value_path
+        f = file(path, 'w')
+        f.write(val)
+        if(val=="0"):
+            self.state = False
+        else:
+            self.state = True
+        f.close()
 
 # sublcass for input:
 class InputGPIO(GPIO):
