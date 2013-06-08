@@ -9,11 +9,13 @@ pin38 = gpio.OutputGPIO("gpmc_ad6")
 class MainHandler(tornado.web.RequestHandler):
     t = tornado.template.Loader("html")
     def get(self):
+
         #load the template file
         
         self.write( self.t.load("template.html").generate() )
         #self.write("Hello, world")
         #pin38.writeVal()
+
 
     def post(self):
         pin38.writeVal()
@@ -29,4 +31,4 @@ if __name__ == "__main__":
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt: #catch when stop the webserver
         # I need to clean up all the gpio that are used
-        gpio.GPIO.CloseAll()
+        gpio.GPIO.close_all()
