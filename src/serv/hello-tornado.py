@@ -1,5 +1,6 @@
 import tornado.ioloop
 import tornado.web
+import tornado.template
 import gpio
 
 
@@ -7,7 +8,10 @@ pin38 = gpio.OutputGPIO("gpmc_ad6")
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Hello, world")
+        #load the template file
+        t = tornado.template.Loader("html")
+        self.write( t.load("template.html").generate() )
+        #self.write("Hello, world")
         pin38.writeVal()
 
 		
