@@ -11,15 +11,22 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
 
         #load the template file
-        
-        self.write( self.t.load("template.html").generate() )
+        if(pin38.state):
+            out = "ON"
+        else:
+            out = "OFF"
+        self.write( self.t.load("template.html").generate(state=out) )
         #self.write("Hello, world")
         #pin38.writeVal()
 
 
     def post(self):
-        pin38.writeVal()
-        self.write(self.t.load("template.html").generate())
+        pin38.toggle()
+        if(pin38.state):
+            out = "ON"
+        else:
+            out = "OFF"
+        self.write(self.t.load("template.html").generate(state=out))
 		
 application = tornado.web.Application([
 	(r"/", MainHandler),
